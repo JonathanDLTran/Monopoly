@@ -1,9 +1,12 @@
+import emoji
 from enum import Enum
 from random import randint
 
 from board import *
 
 STARTING_CASH_AMOUNT = 1500
+
+MAX_PLAYERS = 4
 
 
 class PropertyGroupColor(Enum):
@@ -15,6 +18,30 @@ class PropertyGroupColor(Enum):
     YELLOW = 6
     GREEN = 7
     BLUE = 8
+
+
+class PlayerSymbol(Enum):
+    DOG = emoji.emojize(":dog:", language="alias")
+    SHOE = emoji.emojize(":shoe:", language="alias")
+    IRON = emoji.emojize(":thumbsup:", language="alias")
+    HAT = emoji.emojize(":red_heart:", language="alias")
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+REMAINING_SYMBOLS = [PlayerSymbol.DOG, PlayerSymbol.SHOE,
+                     PlayerSymbol.IRON, PlayerSymbol.HAT]
+
+
+def get_symbol():
+    if REMAINING_SYMBOLS == []:
+        raise RuntimeError("No More Symbols Remaining")
+    symbol = REMAINING_SYMBOLS.pop()
+    return symbol
 
 
 class Card(object):
@@ -68,16 +95,32 @@ class Jail(Location):
 
 
 class Player(object):
-    def __init__(self, player_name, location_id) -> None:
-        self.player_name = player_name
-        self.location = location_id
+    def __init__(self) -> None:
+        self.player_name = ""
+        self.symbol = ""
+
+        self.location = 0
         self.properties = []
+
         self.cash = STARTING_CASH_AMOUNT
         self.in_jail = False
 
+    def setup(self):
+        name = input("Please input your name: ")
+        symbol = get_symbol()
+
+        self.player_name = name
+        self.symbol = symbol
+
+    def __str__(self) -> str:
+        return f"{self.player_name} | {self.symbol}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class Die(object):
-    def __init__(self, minimum, maximum) -> None:
+    def __init__(self, minimum=1, maximum=6) -> None:
         self.minimum = minimum
         self.maximum = maximum
 
@@ -106,5 +149,14 @@ PROPERTIES = [
     # Property("Mediterranean Avenue", PropertyGroupColor.BROWN, )
 ]
 
+
+def main():
+    num_players = int(input("Please enter the number of players: "))
+    for _ in range(num_players):
+        p = Player()
+        p.setup()
+        print(p)
+
+
 if __name__ == "__main__":
-    print(BOARD)
+    main()
