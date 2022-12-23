@@ -3,6 +3,7 @@ from enum import Enum
 from random import randint
 
 from board import *
+from utilities import *
 
 STARTING_CASH_AMOUNT = 1500
 
@@ -99,7 +100,7 @@ class Player(object):
         self.player_name = ""
         self.symbol = ""
 
-        self.location = 0
+        self.__location = 0
         self.properties = []
 
         self.cash = STARTING_CASH_AMOUNT
@@ -112,20 +113,19 @@ class Player(object):
         self.player_name = name
         self.symbol = symbol
 
+    @property
+    def location(self):
+        return self.__location
+
+    @location.setter
+    def location(self, location):
+        self.__location = location
+
     def __str__(self) -> str:
         return f"{self.player_name} | {self.symbol}"
 
     def __repr__(self) -> str:
         return self.__str__()
-
-
-class Die(object):
-    def __init__(self, minimum=1, maximum=6) -> None:
-        self.minimum = minimum
-        self.maximum = maximum
-
-    def roll(self):
-        return randint(self.minimum, self.maximum)
 
 
 class Board(object):
@@ -149,13 +149,41 @@ PROPERTIES = [
     # Property("Mediterranean Avenue", PropertyGroupColor.BROWN, )
 ]
 
+NUM_PROPERTIES = 40  # len(PROPERTIES)
+assert NUM_PROPERTIES > 0
 
-def main():
-    num_players = int(input("Please enter the number of players: "))
-    for _ in range(num_players):
+
+def game_over():
+    pass
+
+
+def player_one_round(player):
+    die1 = randint(1, 6)
+    die2 = randint(1, 6)
+
+    number_steps = (die1 + die2) % NUM_PROPERTIES
+
+    player.location += number_steps
+
+
+def setup_players(n_players):
+    players = []
+    for _ in range(n_players):
         p = Player()
         p.setup()
-        print(p)
+        players.append(p)
+    return players
+
+
+def main():
+    n_players = get_uint_input("Please enter the number of players: ",
+                               "Number of players must be an integer between 1 and 4.", 1, 4)
+    players = setup_players(n_players)
+    print(players)
+    for p in players:
+        player_one_round(p)
+    print(players)
+    print(build_board())
 
 
 if __name__ == "__main__":
