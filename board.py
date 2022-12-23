@@ -3,7 +3,7 @@ BOARD = """
 │              │        │         │          │         │          │        │         │         │          │               │
 │              │        │         │          │         │          │        │         │         │          │               │
 │              │St.     │Electric │ States   │Virginia │Pennsyl-  │St James│Community│Tennessee│New York  │               │
-│   In Jail    │ Charles│Company  │ Avenue   │ Avenue  │  vania   │ Place  │  Chsst  │ Avenue  │ Avenue   │     Free      │
+│Just Visiting │ Charles│Company  │ Avenue   │ Avenue  │  vania   │ Place  │  Chsst  │ Avenue  │ Avenue   │     Free      │
 │              │  Place │         │          │         │ Railroad │        │         │         │          │   Parking     │
 │              │        │         │          │         │          │        │         │         │          │               │
 │              │        │         │          │         │          │        │         │         │          │               │

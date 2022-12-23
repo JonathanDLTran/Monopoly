@@ -1,3 +1,5 @@
+from random import randint
+
 from board import *
 
 STARTING_CASH_AMOUNT = 1500
@@ -7,7 +9,7 @@ class Card(object):
     pass
 
 
-class Property(Card):
+class Location(Card):
     def __init__(self, name, price, fee) -> None:
 
         super().__init__()
@@ -16,17 +18,41 @@ class Property(Card):
         self.fee = fee
         self.bought = False
         self.owner = None
-        self.handler = lambda: print("No Handler")
 
 
-class CommunityChest(Card):
-    def __init__(self) -> None:
-        super().__init__()
+class Go(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
 
 
-class Chance(Card):
-    def __init__(self) -> None:
-        super().__init__()
+class Property(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
+
+
+class CommunityChest(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
+
+
+class Chess(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
+
+
+class Penalty(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
+
+
+class Nop(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
+
+
+class Jail(Location):
+    def __init__(self, name, price, fee) -> None:
+        super().__init__(name, price, fee)
 
 
 class Player(object):
@@ -35,6 +61,15 @@ class Player(object):
         self.location = location_id
         self.properties = []
         self.cash = STARTING_CASH_AMOUNT
+
+
+class Die(object):
+    def __init__(self, minimum, maximum) -> None:
+        self.minimum = minimum
+        self.maximum = maximum
+
+    def roll(self):
+        return randint(self.minimum, self.maximum)
 
 
 class Board(object):
@@ -51,9 +86,8 @@ class Monopoly(object):
 
 
 PROPERTIES = [
-    Property("Go", 1000, 100),
-    Property("Boardwalk", 1000, 100),
-    Property("Atlantic Avenue", 1000, 100),
+    Go("Go", 1000, 100),
+
 ]
 
 if __name__ == "__main__":
