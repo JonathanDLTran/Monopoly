@@ -1,3 +1,4 @@
+from time import sleep
 import emoji
 from enum import Enum
 from random import randint
@@ -24,8 +25,8 @@ class PropertyGroupColor(Enum):
 class PlayerSymbol(Enum):
     DOG = emoji.emojize(":dog:", language="alias")
     SHOE = emoji.emojize(":shoe:", language="alias")
-    IRON = emoji.emojize(":thumbsup:", language="alias")
-    HAT = emoji.emojize(":red_heart:", language="alias")
+    CAR = emoji.emojize(":car:", language="alias")
+    HAT = emoji.emojize(":top_hat:", language="alias")
 
     def __str__(self) -> str:
         return str(self.value)
@@ -35,7 +36,7 @@ class PlayerSymbol(Enum):
 
 
 REMAINING_SYMBOLS = [PlayerSymbol.DOG, PlayerSymbol.SHOE,
-                     PlayerSymbol.IRON, PlayerSymbol.HAT]
+                     PlayerSymbol.CAR, PlayerSymbol.HAT]
 
 
 def get_symbol():
@@ -98,7 +99,7 @@ class Jail(Location):
 class Player(object):
     def __init__(self) -> None:
         self.player_name = ""
-        self.symbol = ""
+        self.__symbol = ""
 
         self.__location = 0
         self.properties = []
@@ -111,7 +112,7 @@ class Player(object):
         symbol = get_symbol()
 
         self.player_name = name
-        self.symbol = symbol
+        self.__symbol = symbol
 
     @property
     def location(self):
@@ -121,8 +122,12 @@ class Player(object):
     def location(self, location):
         self.__location = location
 
+    @property
+    def symbol(self):
+        return self.__symbol
+
     def __str__(self) -> str:
-        return f"{self.player_name} | {self.symbol}"
+        return f"{self.player_name} | {self.__symbol}"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -161,9 +166,9 @@ def player_one_round(player):
     die1 = randint(1, 6)
     die2 = randint(1, 6)
 
-    number_steps = (die1 + die2) % NUM_PROPERTIES
+    number_steps = die1 + die2
 
-    player.location += number_steps
+    player.location = (player.location + number_steps) % NUM_PROPERTIES
 
 
 def setup_players(n_players):
@@ -179,11 +184,17 @@ def main():
     n_players = get_uint_input("Please enter the number of players: ",
                                "Number of players must be an integer between 1 and 4.", 1, 4)
     players = setup_players(n_players)
-    print(players)
-    for p in players:
-        player_one_round(p)
-    print(players)
-    print(build_board())
+
+    print(build_board(players))
+    # for p in players:
+    #     player_one_round(p)
+    # print(build_board(players))
+
+    while True:
+        sleep(0.5)
+        for p in players:
+            player_one_round(p)
+        print(build_board(players))
 
 
 if __name__ == "__main__":
