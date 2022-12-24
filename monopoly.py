@@ -18,6 +18,12 @@ class PropertyGroupColor(Enum):
     GREEN = 7
     BLUE = 8
 
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class PlayerSymbol(Enum):
     DOG = emoji.emojize(":dog:", language="alias")
@@ -68,7 +74,7 @@ class Property(Location):
         self.mortgage = mortgage
 
     def __str__(self) -> str:
-        return f"{self.name} | {self.color} | Deed Price: {self.deed_price} | House Price: {self.house_price} | Rent: {self.rent} | Mortgage Amount: {self.mortgage}"
+        return f"Property Name: {self.name} | Color Group: {self.color} | Deed Price: {self.deed_price} | House Price: {self.house_price} | Rent: {list(zip(['Deed Only', '1 House', '2 Houses','3 House', '4 Houses', 'Hotel'], self.rent))} | Mortgage Amount: {self.mortgage}"
 
     def __repr__(self) -> str:
         return self.__str__()
