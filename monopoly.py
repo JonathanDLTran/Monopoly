@@ -4,11 +4,8 @@ from enum import Enum
 from random import randint
 
 from board import *
+from constants import *
 from utilities import *
-
-STARTING_CASH_AMOUNT = 1500
-
-MAX_PLAYERS = 4
 
 
 class PropertyGroupColor(Enum):
@@ -173,6 +170,10 @@ def player_one_round(player):
     player.location = (player.location + number_steps) % NUM_PROPERTIES
 
     # user gives input
+    while True:
+        user_input = input("Please input a command: ")
+        if user_input == "buy":
+            pass
 
 
 def setup_players(n_players):

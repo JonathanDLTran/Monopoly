@@ -1,38 +1,5 @@
+from constants import *
 from utilities import extend_int_to_string
-
-SPACE = " "
-PLAYER_SYMBOL_STRING_LENGTH = 9
-
-INDEX_TO_PROPERTY_NAME_MAP = {
-    "Mediterranean Avenue": "01",
-    "Baltic Avenue": "03",
-    "Reading Railroad": "05",
-    "Oriental Avenue": "06",
-    "Vermont Avenue": "08",
-    "Connecticut Avenue": "09",
-    "St. Charles Place": "11",
-    "Electric Company": "12",
-    "States Avenue": "13",
-    "Virginia Avenue": "14",
-    "Pennsylvania Railroad": "15",
-    "St. James Place": "16",
-    "Tennessee Avenue": "18",
-    "New York Avenue": "19",
-    "Kentucky Avenue": "21",
-    "Indiana Avenue": "23",
-    "Illinois Avenue": "24",
-    "B&O Railroad": "25",
-    "Atlantic Avenue": "26",
-    "Ventnor Avenue": "27",
-    "Water Works": "28",
-    "Marvin Gardens": "29",
-    "Pacific Avenue": "31",
-    "North Carolina Avenue": "32",
-    "Pennsylvania Avenue": "34",
-    "Short Line": "35",
-    "Park Place": "37",
-    "Boardwalk": "39",
-}
 
 
 def build_board(players):
