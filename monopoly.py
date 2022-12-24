@@ -163,12 +163,16 @@ def game_over():
 
 
 def player_one_round(player):
+
+    # roll dice
+    print("Rolling dice ...")
     die1 = randint(1, 6)
     die2 = randint(1, 6)
-
+    print(f"{die1}, {die2}")
     number_steps = die1 + die2
-
     player.location = (player.location + number_steps) % NUM_PROPERTIES
+
+    # user gives input
 
 
 def setup_players(n_players):
