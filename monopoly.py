@@ -58,38 +58,58 @@ class Go(Location):
 
 
 class Property(Location):
-    def __init__(self, name, color, price, fee) -> None:
+    def __init__(self, name, color, deed_price, house_price, rent, mortgage) -> None:
         super().__init__()
         self.name = name
         self.color = color
-        self.price = price
-        self.fee = fee
+        self.deed_price = deed_price
+        self.house_price = house_price
+        self.rent = rent
+        self.mortgage = mortgage
         self.bought = False
         self.owner = None
 
 
+class Railroad(Location):
+    def __init__(self, name) -> None:
+        super().__init__()
+        self.name = name
+        self.deed_price = 200
+        self.rent = [25, 50, 100, 200]
+        self.mortgage = 100
+
+
+class Utility(Location):
+    def __init__(self, name) -> None:
+        super().__init__()
+        self.name = name
+        self.deed_price = 150
+        self.rent = [4, 10]
+        self.mortgage = 75
+
+
 class CommunityChest(Location):
-    def __init__(self, name, price, fee) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
 
-class Chess(Location):
-    def __init__(self, name, price, fee) -> None:
+class Chance(Location):
+    def __init__(self) -> None:
         super().__init__()
 
 
 class Penalty(Location):
-    def __init__(self, name, price, fee) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
 
 class Nop(Location):
-    def __init__(self, name, price, fee) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
 
 class Jail(Location):
-    def __init__(self, name, price, fee) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
 
@@ -130,29 +150,63 @@ class Player(object):
         return self.__str__()
 
 
-class Board(object):
-    def __init__(self, locations) -> None:
-        self.locations = locations
-
-    def __str__(self) -> str:
-        return BOARD
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
-
-class Monopoly(object):
-    def __init__(self) -> None:
-        self.board = None
-
-
 PROPERTIES = [
-    Go("Go"),
-    # Property("Mediterranean Avenue", PropertyGroupColor.BROWN, )
+    Property(MEDITERRANEAN_AVENUE, PropertyGroupColor.BROWN,
+             60, 50, [2, 10, 30, 90, 160, 250], 30),
+    Property(BALTIC_AVENUE, PropertyGroupColor.BROWN,
+             60, 50, [4, 20, 60, 180, 320, 450], 30),
+    Property(ORIENTAL_AVENUE, PropertyGroupColor.CYAN,
+             100, 50, [6, 30, 90, 270, 400, 550], 50),
+    Property(VERMONT_AVENUE, PropertyGroupColor.CYAN,
+             100, 50, [6, 30, 90, 270, 400, 550], 50),
+    Property(CONNECTICUT_AVENUE, PropertyGroupColor.CYAN,
+             120, 50, [8, 40, 100, 300, 450, 550], 60),
+    Property(ST_CHARLES_PLACE, PropertyGroupColor.MAGENTA,
+             140, 100, [10, 50, 150, 450, 625, 750], 70),
+    Property(STATES_AVENUE, PropertyGroupColor.MAGENTA,
+             140, 100, [10, 50, 150, 450, 625, 750], 70),
+    Property(VIRGINIA_AVENUE, PropertyGroupColor.MAGENTA,
+             160, 100, [12, 60, 180, 500, 700, 900], 80),
+    Property(ST_JAMES_PLACE, PropertyGroupColor.ORANGE,
+             180, 100, [14, 70, 200, 550, 750, 950], 90),
+    Property(TENNESSEE_AVENUE, PropertyGroupColor.ORANGE,
+             180, 100, [14, 70, 200, 550, 750, 950], 90),
+    Property(NEW_YORK_AVENUE, PropertyGroupColor.ORANGE,
+             200, 100, [16, 80, 220, 600, 800, 1000], 100),
+    Property(KENTUCKY_AVENUE, PropertyGroupColor.RED,
+             220, 150, [18, 90, 250, 700, 875, 1050], 110),
+    Property(INDIANA_AVENUE, PropertyGroupColor.RED,
+             220, 150, [18, 90, 250, 700, 875, 1050], 110),
+    Property(ILLINOIS_AVENUE, PropertyGroupColor.RED,
+             240, 150, [20, 100, 300, 750, 925, 1100], 120),
+    Property(ATLANTIC_AVENUE, PropertyGroupColor.YELLOW,
+             260, 150, [22, 110, 330, 800, 975, 1150], 130),
+    Property(VENTNOR_AVENUE, PropertyGroupColor.YELLOW,
+             260, 150, [22, 110, 330, 800, 975, 1150], 130),
+    Property(MARVIN_GARDENS, PropertyGroupColor.YELLOW,
+             280, 150, [24, 120, 360, 850, 1025, 1200], 140),
+    Property(PACIFIC_AVENUE, PropertyGroupColor.GREEN,
+             300, 200, [26, 130, 390, 900, 1100, 1275], 150),
+    Property(NORTH_CAROLINA_AVENUE, PropertyGroupColor.GREEN,
+             300, 200, [26, 130, 390, 900, 1100, 1275], 150),
+    Property(PENNSYLVANIA_AVENUE, PropertyGroupColor.GREEN,
+             320, 200, [28, 150, 450, 1000, 1200, 1400], 160),
+    Property(PARK_PLACE, PropertyGroupColor.BLUE,
+             350, 200, [35, 175, 500, 1100, 1300, 1500], 175),
+    Property(BOARDWALK, PropertyGroupColor.BLUE,
+             400, 200, [50, 200, 600, 1400, 1700, 2000], 200), ]
+
+RAILROADS = [
+    Railroad(READING_RAILROAD),
+    Railroad(PENNSYLVANIA_RAILROAD),
+    Railroad(B_AND_O_RAILROAD),
+    Railroad(SHORT_LINE),
 ]
 
-NUM_PROPERTIES = 40  # len(PROPERTIES)
-assert NUM_PROPERTIES > 0
+UTILITIES = [
+    Utility(ELECTRIC_COMPANY),
+    Utility(WATER_WORKS),
+]
 
 
 def game_over():
