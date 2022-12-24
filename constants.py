@@ -1,3 +1,5 @@
+import emoji
+
 STARTING_CASH_AMOUNT = 1500
 MAX_PLAYERS = 4
 
@@ -69,3 +71,8 @@ PROPERTY_TO_INDEX_MAP = {
 INDEX_TO_PROPERTY_MAP = {
     PROPERTY_TO_INDEX_MAP[k]: k for k in PROPERTY_TO_INDEX_MAP
 }
+
+CAN_BUILD = {k for k in INDEX_TO_PROPERTY_MAP}
+
+HOUSE = emoji.emojize(":house:")
+HOTEL = emoji.emojize(":hotel:")

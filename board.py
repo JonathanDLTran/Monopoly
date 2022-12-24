@@ -32,6 +32,12 @@ def build_board(players):
         key = extend_int_to_string(i)
         h[key] = PLAYER_SYMBOL_STRING_LENGTH * SPACE
 
+    for player in players:
+        for prop in player.properties:
+            property_name = prop.name
+            property_index = PROPERTY_TO_INDEX_MAP[property_name]
+            h[property_index] = HOUSE + 7 * SPACE
+
     board = f"""
     ┌───────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬───────────────┐
     │               │         │         │         │         │         │         │         │         │         │               │

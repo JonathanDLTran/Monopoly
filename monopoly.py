@@ -66,8 +66,12 @@ class Property(Location):
         self.house_price = house_price
         self.rent = rent
         self.mortgage = mortgage
-        self.bought = False
-        self.owner = None
+
+    def __str__(self) -> str:
+        return f"{self.name} | {self.color} | Deed Price: {self.deed_price} | House Price: {self.house_price} | Rent: {self.rent} | Mortgage Amount: {self.mortgage}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Railroad(Location):
@@ -213,21 +217,59 @@ def game_over():
     pass
 
 
-def player_one_round(player):
+def get_property(name):
+    global PROPERTIES
 
-    # roll dice
-    print("Rolling dice ...")
-    die1 = randint(1, 6)
-    die2 = randint(1, 6)
-    print(f"{die1}, {die2}")
-    number_steps = die1 + die2
-    player.location = (player.location + number_steps) % NUM_PROPERTIES
+    new_properties = []
+    final_property = None
+    for prop in PROPERTIES:
+        if prop.name != name:
+            new_properties.append(prop)
+        else:
+            final_property = prop
 
-    # user gives input
-    while True:
-        user_input = input("Please input a command: ")
-        if user_input == "buy":
-            pass
+    PROPERTIES = new_properties
+    return final_property
+
+
+def one_round(players):
+
+    for player in players:
+        print(build_board(players))
+
+        # roll dice
+        die1 = randint(1, 6)
+        die2 = randint(1, 6)
+        print(f"Rolling dice... {die1}, {die2}.")
+        number_steps = die1 + die2
+        player.location = (player.location + number_steps) % NUM_PROPERTIES
+
+        sleep(1)
+
+        print(build_board(players))
+
+        # user gives input
+        while True:
+            user_input = input("Please input a command: ")
+            if user_input == "buy":
+                location = player.location
+                location_key = extend_int_to_string(location)
+                if location_key in CAN_BUILD:
+                    property_name = INDEX_TO_PROPERTY_MAP[location_key]
+                    property_obj = get_property(property_name)
+                    if property_obj != None:
+                        player.properties.append(property_obj)
+                        player.cash -= property_obj.deed_price
+                        # handle bankruptcy
+            elif user_input == "board":
+                print(build_board(players))
+            elif user_input == "user":
+                pass
+            elif user_input == "show properties":
+                for prop in player.properties:
+                    print(prop)
+            elif user_input == "finish":
+                break
 
 
 def setup_players(n_players):
@@ -245,15 +287,15 @@ def main():
     players = setup_players(n_players)
 
     print(build_board(players))
-    # for p in players:
-    #     player_one_round(p)
-    # print(build_board(players))
+
+    while True:
+        start = input("Ready to start? ")
+        if start == "Y":
+            break
 
     while True:
         sleep(0.5)
-        for p in players:
-            player_one_round(p)
-        print(build_board(players))
+        one_round(players)
 
 
 if __name__ == "__main__":
