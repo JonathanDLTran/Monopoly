@@ -1,7 +1,8 @@
-from time import sleep
+from copy import deepcopy
 import emoji
 from enum import Enum
 from random import randint
+from time import sleep
 
 from board import *
 from constants import *
@@ -154,7 +155,7 @@ class Player(object):
         return self.__symbol
 
     def __str__(self) -> str:
-        return f"{self.player_name} | {self.__symbol}"
+        return f"{self.player_name} | {self.__symbol} | ${self.cash}"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -270,7 +271,7 @@ def one_round(players):
             elif user_input == "board":
                 print(build_board(players))
             elif user_input == "user":
-                pass
+                print(player)
             elif user_input == "show properties":
                 for prop in player.properties:
                     print(prop)

@@ -76,3 +76,11 @@ CAN_BUILD = {k for k in INDEX_TO_PROPERTY_MAP}
 
 HOUSE = emoji.emojize(":house:")
 HOTEL = emoji.emojize(":hotel:")
+
+# --------- USER COMMANDS ----------
+
+
+YES_COMMAND = ["y", "yes"]
+BUY_COMMANDS = ["b", "buy"]
+INVENTORY_COMMANDS = ["i", "inv", "inventory"]
+FINISH_COMMANDS = ["f", "fin", "finish"]
