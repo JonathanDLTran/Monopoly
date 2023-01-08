@@ -1,8 +1,8 @@
 from constants import *
-from utilities import extend_int_to_string
+from utilities import extend_int_to_string, format_string
 
 
-def build_board(players):
+def build_board(players, properties):
 
     # create player symbol dictionary
     p = dict()
@@ -32,10 +32,9 @@ def build_board(players):
         key = extend_int_to_string(i)
         h[key] = PLAYER_SYMBOL_STRING_LENGTH * SPACE
 
-    for player in players:
-        for prop in player.properties:
-            property_name = prop.name
-            property_index = PROPERTY_TO_INDEX_MAP[property_name]
+    for prop in properties:
+        property_index = prop.id
+        if prop.houses:
             h[property_index] = HOUSE + 7 * SPACE
 
     # create owned by property dictionary
@@ -43,6 +42,14 @@ def build_board(players):
     for i in range(41):
         key = extend_int_to_string(i)
         o[key] = PLAYER_SYMBOL_STRING_LENGTH * SPACE
+
+    for prop in properties:
+        property_index = prop.id
+        if prop.owner != None:
+            for player in players:
+                if player.id == prop.owner:
+                    o[property_index] = format_string(
+                        player.name, PLAYER_SYMBOL_STRING_LENGTH)
 
     board = f"""
     ┌───────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬───────────────┐
