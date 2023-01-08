@@ -45,11 +45,10 @@ def build_board(players, properties):
 
     for prop in properties:
         property_index = prop.id
-        if prop.owner != None:
-            for player in players:
-                if player.id == prop.owner:
-                    o[property_index] = format_string(
-                        player.name, PLAYER_SYMBOL_STRING_LENGTH)
+        for player in players:
+            if player.id == prop.owner:
+                o[property_index] = format_string(
+                    player.name, PLAYER_SYMBOL_STRING_LENGTH)
 
     board = f"""
     ┌───────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬───────────────┐

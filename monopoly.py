@@ -75,7 +75,7 @@ class Property(Location):
         self.rent = rent
         self.mortgage = mortgage
 
-        self.owner = None
+        self.owner = BANK
         self.houses = 0
 
     def __str__(self) -> str:
@@ -228,11 +228,30 @@ def game_over():
     pass
 
 
-def get_property(name):
+def get_property(prop_id):
     for prop in PROPERTIES:
-        if prop.name == name:
+        if prop.id == prop_id:
             return prop
     raise RuntimeError(f"Cannot Find Property {prop}.")
+
+
+def auction(players, prop_name):
+    auction_values = []
+    for p in players:
+        player_amt = input(
+            f"Enter an integer value greater than or equal to 10, for the auction of the property {prop_name}. Values not in this range will indicate no participation in the auction: ")
+        player_amt = player_amt.strip().lower()
+        if player_amt.isnumeric() and int(player_amt) >= 10:
+            auction_values.append((p, int(player_amt)))
+    sorted_values = sorted(
+        auction_values, key=lambda pair: pair[1], reverse=True)
+    if len(sorted_values) == 0:
+        print("No One Voted in Auction; Bank Retains Property.")
+        return (False, None)
+    if len(sorted_values) > 1 and sorted_values[0][1] == sorted_values[1][1]:
+        print("Tie in auction; Bank Retains Property.")
+        return (False, None)
+    return (True, sorted_values[0])
 
 
 def one_round(players):
@@ -251,20 +270,38 @@ def one_round(players):
 
         print(build_board(players, PROPERTIES))
 
-        # user gives input
-        while True:
-            user_input = input("Please input a command: ")
-            if user_input == "buy":
-                location = player.location
-                location_key = extend_int_to_string(location)
-                if location_key in CAN_BUILD:
-                    property_name = INDEX_TO_PROPERTY_MAP[location_key]
-                    property_obj = get_property(property_name)
+        location = player.location
+        location_key = extend_int_to_string(location)
+        if location_key in CAN_BUILD:
+            property_obj = get_property(location_key)
+            if property_obj.owner == BANK:
+                user_input = input("Do you want to buy this property?: ")
+                if user_input == "yes":
                     property_obj.owner = player.id
                     property_obj.houses += 1
                     player.cash -= property_obj.deed_price
                     # handle bankruptcy
-            elif user_input == "board":
+                else:
+                    auction_result = auction(players, property_obj.name)
+                    if auction_result[0]:
+                        auction_player, player_amt = auction_result[1]
+                        property_obj.owner = auction_player.id
+                        property_obj.houses += 1
+                        player.cash -= player_amt
+
+        # user gives input
+        while True:
+            user_input = input("Please input a command: ")
+            # if user_input == "buy":
+            #     location = player.location
+            #     location_key = extend_int_to_string(location)
+            #     if location_key in CAN_BUILD:
+            #         property_obj = get_property(location_key)
+            #         property_obj.owner = player.id
+            #         property_obj.houses += 1
+            #         player.cash -= property_obj.deed_price
+            #         # handle bankruptcy
+            if user_input == "board":
                 print(build_board(players, PROPERTIES))
             elif user_input == "user":
                 print(player)
