@@ -137,7 +137,13 @@ class Player(object):
         self.__location = 0
 
         self.cash = STARTING_CASH_AMOUNT
+
         self.in_jail = False
+        self.turns_in_jail = 0
+
+        self.rolls_history = []
+
+        self.bankrupt = False
 
     def setup(self):
         name = input("Please input your name: ")
@@ -157,6 +163,20 @@ class Player(object):
     @property
     def symbol(self):
         return self.__symbol
+
+    def reduce_history(self):
+        if len(self.rolls_history) >= 3:
+            self.rolls_history = self.rolls_history[1:]
+
+    def purge_history(self):
+        self.rolls_history = []
+
+    def triple_doubles(self):
+        return len(self.rolls_history) >= 3 \
+            and self.rolls_history[-1][0] == self.rolls_history[-1][1] \
+            and self.rolls_history[-2][0] == self.rolls_history[-2][1] \
+            and self.rolls_history[-3][0] == self.rolls_history[-3][1] \
+
 
     def __str__(self) -> str:
         return f"{self.name} | {self.__symbol} | ${self.cash}"
@@ -257,21 +277,111 @@ def auction(players, prop_name):
 def one_round(players):
 
     for player in players:
+
+        # check victory condition
+        if not player.bankrupt:
+            for p in players:
+                if p != player and not p.bankrupt:
+                    break
+            else:
+                print(
+                    f"Victory for {player.name}! You are the last non-bankrupt player.")
+                exit(0)
+
+        # skip bankrupt players
+        if player.bankrupt:
+            continue
+
+        # print current board state
         print(build_board(players, PROPERTIES))
 
-        # roll dice
+        # roll dice, irregardless if player is in jail or not.
         die1 = randint(1, 6)
         die2 = randint(1, 6)
+
+        # player in jail
+        if player.in_jail:
+            player.turns_in_jail += 1
+            print(
+                f"Either pay a ${JAIL_AMT} fee to leave jail, or roll dice and get doubles, or use a get out of jail card. ")
+            jail_input = input(f"Do you want to pay ${JAIL_AMT}? ")
+
+            can_leave_jail = False
+            if jail_input == "yes" and player.cash >= JAIL_AMT:
+                print("Ok, leaving jail.")
+                player.cash -= JAIL_AMT
+                can_leave_jail = True
+
+            print(f"Rolling dice... {die1}, {die2}.")
+
+            if die1 == die2:
+                print("Rolled Doubles. Leaving Jail.")
+                can_leave_jail = True
+
+            if player.turns_in_jail == JAIL_MAX_TURNS:
+                print(
+                    f"Max Turns in Jail Reached. ${JAIL_AMT} charged to leave.")
+                player.cash -= JAIL_AMT
+                if player.cash < 0:
+                    player.bankrupt = True
+
+            if not can_leave_jail:
+                continue
+            else:
+                player.turns_in_jail = 0
+                player.in_jail = False
+                player.location = JUST_VISITING_ID
+                player.purge_history()
+
+        # only continue if player is not in jail, or leaves jail
+
         print(f"Rolling dice... {die1}, {die2}.")
+        player.reduce_history()
+        player.rolls_history.append((die1, die2))
         number_steps = die1 + die2
+
+        old_location = player.location
         player.location = (player.location + number_steps) % NUM_PROPERTIES
 
         sleep(1)
 
         print(build_board(players, PROPERTIES))
 
+        # Grab current location of player
         location = player.location
         location_key = extend_int_to_string(location)
+
+        # check if enter JAIL conditions is true
+        go_to_jail = False
+        # if rolled doubles 3 times in a row, GO TO JAIL
+        if player.triple_doubles():
+            go_to_jail = True
+            print("You rolled doubles 3 times in a row. You are sent to jail.")
+
+        # land on GO TO JAIL
+        if player.location == GO_TO_JAIL_ID:
+            go_to_jail = True
+            print("You landed on GO TO JAIL. You are sent to jail.")
+
+        if go_to_jail:
+            print("You lose this turn.")
+            player.location = JAIL_ID
+            player.in_jail = True
+
+            sleep(2)
+
+            print(build_board(players, PROPERTIES))
+
+            sleep(2)
+
+            continue
+
+        # pass GO, get $200
+        if player.location < old_location:
+            print("You passed Go! You earn $200!")
+            player.cash += GO_AMT
+
+        # property is owned by bank: either sell to current player, or attempt to auction to all players
         if location_key in CAN_BUILD:
             property_obj = get_property(location_key)
             if property_obj.owner == BANK:
@@ -292,15 +402,6 @@ def one_round(players):
         # user gives input
         while True:
             user_input = input("Please input a command: ")
-            # if user_input == "buy":
-            #     location = player.location
-            #     location_key = extend_int_to_string(location)
-            #     if location_key in CAN_BUILD:
-            #         property_obj = get_property(location_key)
-            #         property_obj.owner = player.id
-            #         property_obj.houses += 1
-            #         player.cash -= property_obj.deed_price
-            #         # handle bankruptcy
             if user_input == "board":
                 print(build_board(players, PROPERTIES))
             elif user_input == "user":
@@ -311,6 +412,10 @@ def one_round(players):
                         print(prop)
             elif user_input == "finish":
                 break
+
+        # Final check of player's cash balance for bankruptcy at end of turn
+        if player.cash < 0:
+            player.bankrupt = True
 
 
 def setup_players(n_players):

@@ -42,6 +42,10 @@ SHORT_LINE = "Short Line"
 PARK_PLACE = "Park Place"
 BOARDWALK = "Boardwalk"
 
+GO_TO_JAIL_ID = 30
+JUST_VISITING_ID = 10
+JAIL_ID = 40
+
 PROPERTY_TO_INDEX_MAP = {
     MEDITERRANEAN_AVENUE: "01",
     BALTIC_AVENUE: "03",
@@ -82,6 +86,11 @@ CAN_BUILD = {k for k in INDEX_TO_PROPERTY_MAP}
 HOUSE = emoji.emojize(":house:")
 HOTEL = emoji.emojize(":hotel:")
 
+GO_AMT = 200
+JAIL_AMT = 50
+
+JAIL_MAX_TURNS = 3
+
 # --------- USER COMMANDS ----------
 
 
@@ -91,6 +100,7 @@ INVENTORY_COMMANDS = ["i", "inv", "inventory"]
 FINISH_COMMANDS = ["f", "fin", "finish"]
 
 # --------- COLORS ----------
+# https://stackoverflow.com/questions/39473297/how-do-i-print-colored-output-with-python-3
 
 CEND = '\33[0m'
 CBOLD = '\33[1m'
