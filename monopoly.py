@@ -322,8 +322,6 @@ def one_round(players):
                 print(
                     f"Max Turns in Jail Reached. ${JAIL_AMT} charged to leave.")
                 player.cash -= JAIL_AMT
-                if player.cash < 0:
-                    player.bankrupt = True
 
             if not can_leave_jail:
                 continue
@@ -381,6 +379,11 @@ def one_round(players):
             print("You passed Go! You earn $200!")
             player.cash += GO_AMT
 
+        # Land on Income Tax
+        if player.location in [INCOME_TAX_ID, LUXURY_TAX_ID]:
+            print(f"You have be accessed a ${TAX_AMT}.")
+            player.cash -= TAX_AMT
+
         # property is owned by bank: either sell to current player, or attempt to auction to all players
         if location_key in CAN_BUILD:
             property_obj = get_property(location_key)
@@ -415,6 +418,7 @@ def one_round(players):
 
         # Final check of player's cash balance for bankruptcy at end of turn
         if player.cash < 0:
+            print("You have become bankrupt at the end of the turn. Game over.")
             player.bankrupt = True
 
 
