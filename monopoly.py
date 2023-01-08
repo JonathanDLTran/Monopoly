@@ -241,7 +241,7 @@ def auction(players, prop_name):
         player_amt = input(
             f"Enter an integer value greater than or equal to 10, for the auction of the property {prop_name}. Values not in this range will indicate no participation in the auction: ")
         player_amt = player_amt.strip().lower()
-        if player_amt.isnumeric() and int(player_amt) >= 10:
+        if player_amt.isnumeric() and int(player_amt) >= 10 and 0 <= int(player_amt) <= p.cash:
             auction_values.append((p, int(player_amt)))
     sorted_values = sorted(
         auction_values, key=lambda pair: pair[1], reverse=True)

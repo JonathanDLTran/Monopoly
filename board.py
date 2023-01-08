@@ -52,7 +52,7 @@ def build_board(players, properties):
 
     board = f"""
     ┌───────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬───────────────┐
-    │               │         │         │         │         │         │         │         │         │         │               │
+    │               │{GRE_HDR}│         │{GRE_HDR}│{GRE_HDR}│         │{YEL_HDR}│         │{YEL_HDR}│{YEL_HDR}│               │
     │               │         │         │         │         │         │         │         │         │         │               │
     │ Just Visiting │   St.   │Electric │ States  │Virginia │Pennsyl- │St. James│Community│Tennessee│New York │    Free       │
     │               │ Charles │Company  │ Avenue  │ Avenue  │ vania   │ Place   │  Chest  │ Avenue  │ Avenue  │   Parking     │
@@ -61,28 +61,28 @@ def build_board(players, properties):
     │{h["10"]}      │{h["11"]}│{h["12"]}│{h["13"]}│{h["14"]}│{h["15"]}│{h["16"]}│{h["17"]}│{h["18"]}│{h["19"]}│{h["20"]}      │
     │{p["10"]}      │{p["11"]}│{p["12"]}│{p["13"]}│{p["14"]}│{p["15"]}│{p["16"]}│{p["17"]}│{p["18"]}│{p["19"]}│{p["20"]}      │
     ├───────────────┼─────────┼─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┼───────────────┤
-    │               │         │                                                                               │               │
+    │{RED_HDR      }│         │                                                                               │{BLU_HDR      }│
     │  Connecticut  │  Jail   │                                                                               │Kentucky Avenue│
     │    Avenue     │         │                                                                               │               │
     │{o["09"]}      │{o["40"]}│                                                                               │{o["21"]}      │
     │{h["09"]}      │{h["40"]}│                                                                               │{h["21"]}      │
     │{p["09"]}      │{p["40"]}│                                                                               │{p["21"]}      │
     ├───────────────┼─────────┘                                                                               ├───────────────┤
-    │               │                                                                                         │               │
+    │{RED_HDR      }│                                                                                         │               │
     │Vermont Avenue │                                                                                         │    Chance     │
     │               │                                                                                         │               │
     │{o["08"]}      │                                                                                         │{o["22"]}      │
     │{h["08"]}      │                                                                                         │{h["22"]}      │
     │{p["08"]}      │                                                                                         │{p["22"]}      │
     ├───────────────┤                                                                                         ├───────────────┤
-    │               │                                                                                         │               │
+    │               │                                                                                         │{BLU_HDR      }│
     │    Chance     │                                                                                         │Indiana Avenue │
     │               │                                                                                         │               │
     │{o["07"]}      │                                                                                         │{o["23"]}      │
     │{h["07"]}      │                                                                                         │{h["23"]}      │
     │{p["07"]}      │                                                                                         │{p["23"]}      │
     ├───────────────┤                                                                                         ├───────────────┤
-    │               │                                                                                         │               │
+    │{RED_HDR      }│                                                                                         │{BLU_HDR      }│
     │Oriental Avenue│                                                                                         │Illinois Avenue│
     │               │                                                                                         │               │
     │{o["06"]}      │                                                                                         │{o["24"]}      │
@@ -96,14 +96,14 @@ def build_board(players, properties):
     │{h["05"]}      │                                                                                         │{h["25"]}      │
     │{p["05"]}      │                                                                                         │{p["25"]}      │
     ├───────────────┤                                                                                         ├───────────────┤
-    │               │                                                                                         │               │
+    │               │                                                                                         │{VIO_HDR      }│
     │  Income Tax   │                                                                                         │Atlantic Avenue│
     │               │                                                                                         │               │
     │{o["04"]}      │                                                                                         │{o["26"]}      │
     │{h["04"]}      │                                                                                         │{h["26"]}      │
     │{p["04"]}      │                                                                                         │{p["26"]}      │
     ├───────────────┤                                                                                         ├───────────────┤
-    │               │                                                                                         │               │
+    │{GRY_HDR      }│                                                                                         │{VIO_HDR      }│
     │ Baltic Avenue │                                                                                         │Ventnor Avenue │
     │               │                                                                                         │               │
     │{o["03"]}      │                                                                                         │{o["27"]}      │
@@ -117,14 +117,14 @@ def build_board(players, properties):
     │{h["02"]}      │                                                                                         │{h["28"]}      │
     │{p["02"]}      │                                                                                         │{p["28"]}      │
     ├───────────────┤                                                                                         ├───────────────┤
-    │               │                                                                                         │               │
+    │{GRY_HDR      }│                                                                                         │{VIO_HDR      }│
     │ Mediterranean │                                                                                         │Marvin Gardens │
     │    Avenue     │                                                                                         │               │
     │{o["01"]}      │                                                                                         │{o["29"]}      │
     │{h["01"]}      │                                                                                         │{h["29"]}      │
     │{p["01"]}      │                                                                                         │{p["29"]}      │
     ├───────────────┼─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┼───────────────┤
-    │               │         │         │         │         │         │         │         │         │         │               │
+    │               │{WHI_HDR}│         │{WHI_HDR}│         │         │{BEI_HDR}│         │{BEI_HDR}|{BEI_HDR}│               │
     │               │         │         │         │         │         │         │         │         │         │               │
     │    GO!        │Boardwalk│ Luxury  │  Park   │ Chance  │  Short  │Pennsyl- │Community│ North   │ Pacific │  Go To Jail   │
     │               │         │  Tax    │  Place  │         │  Line   │ vania   │  Chest  │ Carolina│ Avenue  │               │
