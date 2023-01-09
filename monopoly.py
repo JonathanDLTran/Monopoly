@@ -274,6 +274,23 @@ def auction(players, prop_name):
     return (True, sorted_values[0])
 
 
+def is_on_another_player_property(player, players, properties):
+    location = player.location
+    location_key = extend_int_to_string(location)
+    if location_key not in CAN_BUILD:
+        return (False, None, None)
+    prop = get_property(location_key)
+    if prop.owner == player.id or prop.owner == BANK:
+        return (False, None, None)
+    other_player_id = prop.owner
+    other_player = None
+    for p in players:
+        if p.id == other_player_id:
+            other_player = p
+            break
+    return (True, other_player, prop)
+
+
 def one_round(players):
 
     for player in players:
@@ -376,7 +393,7 @@ def one_round(players):
 
         # pass GO, get $200
         if player.location < old_location:
-            print("You passed Go! You earn $200!")
+            print(f"You passed Go! You earn ${GO_AMT}!")
             player.cash += GO_AMT
 
         # Land on Income Tax
@@ -384,15 +401,24 @@ def one_round(players):
             print(f"You have been accessed a ${TAX_AMT} tax.")
             player.cash -= TAX_AMT
 
+        # Land on another player's property
+        if is_on_another_player_property(player, players, PROPERTIES)[0]:
+            _, other_player, other_player_prop = is_on_another_player_property(
+                player, players, PROPERTIES)
+            other_player_houses = other_player_prop.houses
+            rent = other_player_prop.rent[other_player_houses]
+            print(f"You owe {other_player.name} ${rent} in rent.")
+            other_player.cash += rent
+            player.cash -= rent
+
         # property is owned by bank: either sell to current player, or attempt to auction to all players
         if location_key in CAN_BUILD:
             property_obj = get_property(location_key)
             if property_obj.owner == BANK:
                 user_input = input("Do you want to buy this property?: ")
-                if user_input == "yes":
+                if user_input == "yes" and player.cash >= property_obj.deed_price:
                     property_obj.owner = player.id
                     player.cash -= property_obj.deed_price
-                    # handle bankruptcy
                 else:
                     auction_result = auction(players, property_obj.name)
                     if auction_result[0]:
@@ -446,9 +472,17 @@ def one_round(players):
                     print(
                         "Properties must be built in a balanced manner. You cannot build the house.")
                     continue
-                if prop.houses < MAX_HOUSES:
+                if player.cash < prop.house_price:
+                    print("You do not have enough money to upgrade property. ")
+                    continue
+                if prop.houses < MAX_HOUSES - 1:
                     prop.houses += 1
+                    player.cash -= prop.house_price
                     print("House was built.")
+                elif prop.houses < MAX_HOUSES:
+                    prop.houses += 1
+                    player.cash -= prop.house_price
+                    print("Hotel was built.")
                 else:
                     print(f"You can have at most 4 houses or a hotel on a property.")
             # Commands for Testing Purposes
