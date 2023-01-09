@@ -1,6 +1,6 @@
 import emoji
 from enum import Enum
-from random import randint
+from random import randint, shuffle
 from time import sleep
 
 from board import *
@@ -136,13 +136,52 @@ class Card(object):
 
 
 class CommunityChest(Card):
-    def __init__(self) -> None:
+    def __init__(self, name, action) -> None:
         super().__init__()
+        self.name = name
+        self.action = action
+
+    def do_action(self, player, players):
+        self.action(player, players)
 
 
 class Chance(Card):
-    def __init__(self) -> None:
+    def __init__(self, name, action) -> None:
         super().__init__()
+        self.name = name
+        self.action = action
+
+    def do_action(self, player, players):
+        self.action(player, players)
+
+
+CHANCE_DECK = shuffle([
+
+])
+
+
+def advance_to_go(player, players):
+    player.location = GO_ID
+
+
+def bank_error(player, players):
+    player.cash += 200
+
+
+def doctors_fees(player, players):
+    player.cash -= 50
+
+
+def sell_stock(player, players):
+    player.cash += 50
+
+
+COMMUNITY_DECK = shuffle([
+    CommunityChest("Advance To Go: Collect $200", advance_to_go),
+    CommunityChest("Bank Error In Your Favor: Collect $200", bank_error),
+    CommunityChest("Doctors Fees: Pay $50", doctors_fees),
+    CommunityChest("Sale of Stock: Earn $50", sell_stock),
+])
 
 
 class Player(object):
@@ -394,6 +433,10 @@ def one_round(players):
         location = player.location
         location_key = extend_int_to_string(location)
 
+        # chance card
+
+        # community chest card
+
         # check if enter JAIL conditions is true
         go_to_jail = False
         # if rolled doubles 3 times in a row, GO TO JAIL
@@ -420,7 +463,7 @@ def one_round(players):
             continue
 
         # pass GO, get $200
-        if player.location < old_location:
+        if player.location <= old_location:
             print(f"You passed Go! You earn ${GO_AMT}!")
             player.cash += GO_AMT
 
@@ -470,6 +513,7 @@ def one_round(players):
             print(f"You owe {other_player.name} ${rent} in rent.")
             other_player.cash += rent
             player.cash -= rent
+
         # property is owned by bank: either sell to current player, or attempt to auction to all players
         if location_key in CAN_OWN:
             property_obj = get_property(location_key)
@@ -497,6 +541,8 @@ def one_round(players):
                     if prop.owner == player.id:
                         print(prop)
             elif user_input == "finish":
+                break
+            elif user_input == "trade":
                 break
             elif is_string_plus_number("mortgage", user_input)[0]:
                 _, location = is_string_plus_number("mortgage", user_input)
