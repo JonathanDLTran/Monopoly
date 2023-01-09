@@ -1,4 +1,3 @@
-from copy import deepcopy
 import emoji
 from enum import Enum
 from random import randint
@@ -10,6 +9,7 @@ from utilities import *
 
 
 class PropertyGroupColor(Enum):
+    NO_COLOR = 0
     BROWN = 1
     CYAN = 2
     MAGENTA = 3
@@ -18,6 +18,8 @@ class PropertyGroupColor(Enum):
     YELLOW = 6
     GREEN = 7
     BLUE = 8
+    RAILROAD = 9
+    UTILITY = 10
 
     def __str__(self) -> str:
         return str(self.value)
@@ -50,21 +52,29 @@ def get_symbol():
     return symbol
 
 
-class Card(object):
-    pass
-
-
-class Location(Card):
+class Location(object):
     def __init__(self) -> None:
-        pass
+        self.id = -1
+        self.name = ""
+        self.color = PropertyGroupColor.NO_COLOR
+        self.deed_price = 0
+        self.house_price = 0
+        self.rent = []
+        self.mortgage = 0
+
+        self.owner = BANK
+        self.houses = 0
+
+        self.mortgaged = False
+
+    def __str__(self) -> str:
+        return f"Property Name: {self.name} | Deed Price: {self.deed_price} | Mortgage Amount: {self.mortgage}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
-class Go(Location):
-    def __init__(self, name) -> None:
-        self.name = name
-
-
-class Property(Location):
+class Buildable(Location):
     def __init__(self, loc_id, name, color, deed_price, house_price, rent, mortgage) -> None:
         super().__init__()
         self.id = loc_id
@@ -88,44 +98,49 @@ class Property(Location):
 
 
 class Railroad(Location):
-    def __init__(self, name) -> None:
+    def __init__(self, loc_id, name) -> None:
         super().__init__()
+        self.id = loc_id
         self.name = name
+        self.color = PropertyGroupColor.RAILROAD
         self.deed_price = 200
+        self.house_price = 0
         self.rent = [25, 50, 100, 200]
         self.mortgage = 100
 
+        self.owner = BANK
+        self.houses = 0
+
+        self.mortgaged = False
+
 
 class Utility(Location):
-    def __init__(self, name) -> None:
+    def __init__(self, loc_id, name) -> None:
         super().__init__()
+        self.id = loc_id
         self.name = name
+        self.color = PropertyGroupColor.UTILITY
         self.deed_price = 150
+        self.house_price = 0
         self.rent = [4, 10]
         self.mortgage = 75
 
+        self.owner = BANK
+        self.houses = 0
 
-class CommunityChest(Location):
+        self.mortgaged = False
+
+
+class Card(object):
+    pass
+
+
+class CommunityChest(Card):
     def __init__(self) -> None:
         super().__init__()
 
 
-class Chance(Location):
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class Penalty(Location):
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class Nop(Location):
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class Jail(Location):
+class Chance(Card):
     def __init__(self) -> None:
         super().__init__()
 
@@ -187,63 +202,65 @@ class Player(object):
         return self.__str__()
 
 
-PROPERTIES = [
-    Property("01", MEDITERRANEAN_AVENUE, PropertyGroupColor.BROWN,
-             60, 50, [2, 10, 30, 90, 160, 250], 30),
-    Property("03", BALTIC_AVENUE, PropertyGroupColor.BROWN,
-             60, 50, [4, 20, 60, 180, 320, 450], 30),
-    Property("06", ORIENTAL_AVENUE, PropertyGroupColor.CYAN,
-             100, 50, [6, 30, 90, 270, 400, 550], 50),
-    Property("08", VERMONT_AVENUE, PropertyGroupColor.CYAN,
-             100, 50, [6, 30, 90, 270, 400, 550], 50),
-    Property("09", CONNECTICUT_AVENUE, PropertyGroupColor.CYAN,
-             120, 50, [8, 40, 100, 300, 450, 550], 60),
-    Property("11", ST_CHARLES_PLACE, PropertyGroupColor.MAGENTA,
-             140, 100, [10, 50, 150, 450, 625, 750], 70),
-    Property("13", STATES_AVENUE, PropertyGroupColor.MAGENTA,
-             140, 100, [10, 50, 150, 450, 625, 750], 70),
-    Property("14", VIRGINIA_AVENUE, PropertyGroupColor.MAGENTA,
-             160, 100, [12, 60, 180, 500, 700, 900], 80),
-    Property("16", ST_JAMES_PLACE, PropertyGroupColor.ORANGE,
-             180, 100, [14, 70, 200, 550, 750, 950], 90),
-    Property("18", TENNESSEE_AVENUE, PropertyGroupColor.ORANGE,
-             180, 100, [14, 70, 200, 550, 750, 950], 90),
-    Property("19", NEW_YORK_AVENUE, PropertyGroupColor.ORANGE,
-             200, 100, [16, 80, 220, 600, 800, 1000], 100),
-    Property("21", KENTUCKY_AVENUE, PropertyGroupColor.RED,
-             220, 150, [18, 90, 250, 700, 875, 1050], 110),
-    Property("23", INDIANA_AVENUE, PropertyGroupColor.RED,
-             220, 150, [18, 90, 250, 700, 875, 1050], 110),
-    Property("24", ILLINOIS_AVENUE, PropertyGroupColor.RED,
-             240, 150, [20, 100, 300, 750, 925, 1100], 120),
-    Property("26", ATLANTIC_AVENUE, PropertyGroupColor.YELLOW,
-             260, 150, [22, 110, 330, 800, 975, 1150], 130),
-    Property("27", VENTNOR_AVENUE, PropertyGroupColor.YELLOW,
-             260, 150, [22, 110, 330, 800, 975, 1150], 130),
-    Property("29", MARVIN_GARDENS, PropertyGroupColor.YELLOW,
-             280, 150, [24, 120, 360, 850, 1025, 1200], 140),
-    Property("31", PACIFIC_AVENUE, PropertyGroupColor.GREEN,
-             300, 200, [26, 130, 390, 900, 1100, 1275], 150),
-    Property("32", NORTH_CAROLINA_AVENUE, PropertyGroupColor.GREEN,
-             300, 200, [26, 130, 390, 900, 1100, 1275], 150),
-    Property("34", PENNSYLVANIA_AVENUE, PropertyGroupColor.GREEN,
-             320, 200, [28, 150, 450, 1000, 1200, 1400], 160),
-    Property("37", PARK_PLACE, PropertyGroupColor.BLUE,
-             350, 200, [35, 175, 500, 1100, 1300, 1500], 175),
-    Property("39", BOARDWALK, PropertyGroupColor.BLUE,
-             400, 200, [50, 200, 600, 1400, 1700, 2000], 200), ]
+BUILADBLES = [
+    Buildable("01", MEDITERRANEAN_AVENUE, PropertyGroupColor.BROWN,
+              60, 50, [2, 10, 30, 90, 160, 250], 30),
+    Buildable("03", BALTIC_AVENUE, PropertyGroupColor.BROWN,
+              60, 50, [4, 20, 60, 180, 320, 450], 30),
+    Buildable("06", ORIENTAL_AVENUE, PropertyGroupColor.CYAN,
+              100, 50, [6, 30, 90, 270, 400, 550], 50),
+    Buildable("08", VERMONT_AVENUE, PropertyGroupColor.CYAN,
+              100, 50, [6, 30, 90, 270, 400, 550], 50),
+    Buildable("09", CONNECTICUT_AVENUE, PropertyGroupColor.CYAN,
+              120, 50, [8, 40, 100, 300, 450, 550], 60),
+    Buildable("11", ST_CHARLES_PLACE, PropertyGroupColor.MAGENTA,
+              140, 100, [10, 50, 150, 450, 625, 750], 70),
+    Buildable("13", STATES_AVENUE, PropertyGroupColor.MAGENTA,
+              140, 100, [10, 50, 150, 450, 625, 750], 70),
+    Buildable("14", VIRGINIA_AVENUE, PropertyGroupColor.MAGENTA,
+              160, 100, [12, 60, 180, 500, 700, 900], 80),
+    Buildable("16", ST_JAMES_PLACE, PropertyGroupColor.ORANGE,
+              180, 100, [14, 70, 200, 550, 750, 950], 90),
+    Buildable("18", TENNESSEE_AVENUE, PropertyGroupColor.ORANGE,
+              180, 100, [14, 70, 200, 550, 750, 950], 90),
+    Buildable("19", NEW_YORK_AVENUE, PropertyGroupColor.ORANGE,
+              200, 100, [16, 80, 220, 600, 800, 1000], 100),
+    Buildable("21", KENTUCKY_AVENUE, PropertyGroupColor.RED,
+              220, 150, [18, 90, 250, 700, 875, 1050], 110),
+    Buildable("23", INDIANA_AVENUE, PropertyGroupColor.RED,
+              220, 150, [18, 90, 250, 700, 875, 1050], 110),
+    Buildable("24", ILLINOIS_AVENUE, PropertyGroupColor.RED,
+              240, 150, [20, 100, 300, 750, 925, 1100], 120),
+    Buildable("26", ATLANTIC_AVENUE, PropertyGroupColor.YELLOW,
+              260, 150, [22, 110, 330, 800, 975, 1150], 130),
+    Buildable("27", VENTNOR_AVENUE, PropertyGroupColor.YELLOW,
+              260, 150, [22, 110, 330, 800, 975, 1150], 130),
+    Buildable("29", MARVIN_GARDENS, PropertyGroupColor.YELLOW,
+              280, 150, [24, 120, 360, 850, 1025, 1200], 140),
+    Buildable("31", PACIFIC_AVENUE, PropertyGroupColor.GREEN,
+              300, 200, [26, 130, 390, 900, 1100, 1275], 150),
+    Buildable("32", NORTH_CAROLINA_AVENUE, PropertyGroupColor.GREEN,
+              300, 200, [26, 130, 390, 900, 1100, 1275], 150),
+    Buildable("34", PENNSYLVANIA_AVENUE, PropertyGroupColor.GREEN,
+              320, 200, [28, 150, 450, 1000, 1200, 1400], 160),
+    Buildable("37", PARK_PLACE, PropertyGroupColor.BLUE,
+              350, 200, [35, 175, 500, 1100, 1300, 1500], 175),
+    Buildable("39", BOARDWALK, PropertyGroupColor.BLUE,
+              400, 200, [50, 200, 600, 1400, 1700, 2000], 200), ]
 
 RAILROADS = [
-    Railroad(READING_RAILROAD),
-    Railroad(PENNSYLVANIA_RAILROAD),
-    Railroad(B_AND_O_RAILROAD),
-    Railroad(SHORT_LINE),
+    Railroad("05", READING_RAILROAD),
+    Railroad("15", PENNSYLVANIA_RAILROAD),
+    Railroad("25", B_AND_O_RAILROAD),
+    Railroad("35", SHORT_LINE),
 ]
 
 UTILITIES = [
-    Utility(ELECTRIC_COMPANY),
-    Utility(WATER_WORKS),
+    Utility("12", ELECTRIC_COMPANY),
+    Utility("28", WATER_WORKS),
 ]
+
+PROPERTIES = BUILADBLES + RAILROADS + UTILITIES
 
 
 def game_over():
@@ -279,7 +296,7 @@ def auction(players, prop_name):
 def is_on_another_player_property(player, players, properties):
     location = player.location
     location_key = extend_int_to_string(location)
-    if location_key not in CAN_BUILD:
+    if location_key not in CAN_OWN:
         return (False, None, None)
     prop = get_property(location_key)
     if prop.owner == player.id or prop.owner == BANK or prop.mortgaged:
@@ -291,6 +308,15 @@ def is_on_another_player_property(player, players, properties):
             other_player = p
             break
     return (True, other_player, prop)
+
+
+def has_monopoly(player, prop, properties):
+    prop_color = prop.color
+    property_group = [p for p in properties if p.color == prop_color]
+    for prop in property_group:
+        if prop.owner != player.id:
+            return False
+    return True
 
 
 def one_round(players):
@@ -407,14 +433,45 @@ def one_round(players):
         if is_on_another_player_property(player, players, PROPERTIES)[0]:
             _, other_player, other_player_prop = is_on_another_player_property(
                 player, players, PROPERTIES)
-            other_player_houses = other_player_prop.houses
-            rent = other_player_prop.rent[other_player_houses]
+            rent = 0
+            if isinstance(other_player_prop, Buildable):
+                other_player_houses = other_player_prop.houses
+                rent = other_player_prop.rent[other_player_houses]
+                # if has monopoly and unimproved, double rent
+                if has_monopoly(other_player, other_player_prop, PROPERTIES) and other_player_houses == 0:
+                    rent *= 2
+            elif isinstance(other_player_prop, Railroad):
+                num_rrs_owned = len(
+                    [p for p in PROPERTIES if isinstance(p, Railroad) and p.owner == other_player.id])
+                if num_rrs_owned == 1:
+                    rent = (die1 + die2) * ONE_RAILROAD_RENT
+                elif num_rrs_owned == 2:
+                    rent = (die1 + die2) * TWO_RAILROAD_RENT
+                elif num_rrs_owned == 3:
+                    rent = (die1 + die2) * THREE_RAILROAD_RENT
+                elif num_rrs_owned == 4:
+                    rent = (die1 + die2) * FOUR_RAILROAD_RENT
+                else:
+                    raise RuntimeError(f"Railroads owned must be less than 4.")
+            elif isinstance(other_group_prop, Utility):
+                num_utils_owned = len(
+                    [p for p in PROPERTIES if isinstance(p, Utility) and p.owner == other_player.id])
+                if num_utils_owned == 1:
+                    rent = (die1 + die2) * ONE_UTILITIES_MULTIPLIER
+                elif num_utils_owned == 2:
+                    rent = (die1 + die2) * TWO_UTILITIES_MULTIPLIER
+                else:
+                    raise RuntimeError(f"Utilities owned must be less than 2.")
+            else:
+                raise RuntimeError(
+                    f"Property object {other_player_prop} type {type(other_player_prop)} not recognized. ")
+
+            assert rent != None and type(rent) == int and rent > 0
             print(f"You owe {other_player.name} ${rent} in rent.")
             other_player.cash += rent
             player.cash -= rent
-
         # property is owned by bank: either sell to current player, or attempt to auction to all players
-        if location_key in CAN_BUILD:
+        if location_key in CAN_OWN:
             property_obj = get_property(location_key)
             if property_obj.owner == BANK:
                 user_input = input("Do you want to buy this property?: ")
@@ -446,7 +503,7 @@ def one_round(players):
                 if location < 0 or location >= NUM_PROPERTIES:
                     continue
                 location_key = extend_int_to_string(location)
-                if location_key not in CAN_BUILD:
+                if location_key not in CAN_OWN:
                     continue
                 prop = get_property(location_key)
                 if prop.owner != player.id:
@@ -464,7 +521,7 @@ def one_round(players):
                 if location < 0 or location >= NUM_PROPERTIES:
                     continue
                 location_key = extend_int_to_string(location)
-                if location_key not in CAN_BUILD:
+                if location_key not in CAN_OWN:
                     continue
                 prop = get_property(location_key)
                 if prop.owner != player.id:
@@ -560,7 +617,7 @@ def one_round(players):
             elif user_input == "buy":
                 location = player.location
                 location_key = extend_int_to_string(location)
-                if location_key in CAN_BUILD:
+                if location_key in CAN_OWN:
                     prop = get_property(location_key)
                     prop.owner = player.id
 
