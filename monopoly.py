@@ -279,14 +279,14 @@ def one_round(players):
     for player in players:
 
         # check victory condition
-        if not player.bankrupt:
-            for p in players:
-                if p != player and not p.bankrupt:
-                    break
-            else:
-                print(
-                    f"Victory for {player.name}! You are the last non-bankrupt player.")
-                exit(0)
+        # if not player.bankrupt:
+        #     for p in players:
+        #         if p != player and not p.bankrupt:
+        #             break
+        #     else:
+        #         print(
+        #             f"Victory for {player.name}! You are the last non-bankrupt player.")
+        #         exit(0)
 
         # skip bankrupt players
         if player.bankrupt:
@@ -391,7 +391,7 @@ def one_round(players):
                 user_input = input("Do you want to buy this property?: ")
                 if user_input == "yes":
                     property_obj.owner = player.id
-                    property_obj.houses += 1
+                    # property_obj.houses += 1
                     player.cash -= property_obj.deed_price
                     # handle bankruptcy
                 else:
@@ -415,6 +415,28 @@ def one_round(players):
                         print(prop)
             elif user_input == "finish":
                 break
+            elif is_string_plus_number("upgrade", user_input)[0]:
+                _, location = is_string_plus_number("upgrade", user_input)
+                if location < 0 or location >= NUM_PROPERTIES:
+                    continue
+                location_key = extend_int_to_string(location)
+                if location_key not in CAN_BUILD:
+                    continue
+                prop = get_property(location_key)
+                if prop.owner != player.id:
+                    print(f"You do not own property {prop}.")
+                    continue
+                if prop.houses < MAX_HOUSES:
+                    prop.houses += 1
+                    print("House was built.")
+                else:
+                    print(f"You can have at most 4 houses on a property.")
+            # Commands for Testing Purposes
+            elif user_input == "+1":
+                player.location = (player.location + 1) % NUM_PROPERTIES
+            elif user_input == "-1":
+                player.location = (player.location +
+                                   NUM_PROPERTIES - 1) % NUM_PROPERTIES
 
         # Final check of player's cash balance for bankruptcy at end of turn
         if player.cash < 0:

@@ -94,6 +94,8 @@ TAX_AMT = 200
 
 JAIL_MAX_TURNS = 3
 
+MAX_HOUSES = 4
+
 # --------- USER COMMANDS ----------
 
 

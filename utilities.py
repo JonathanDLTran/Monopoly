@@ -34,3 +34,16 @@ def format_string(string, length):
     if len(string) < length:
         return string + SPACE * (length - len(string))
     return string[:length]
+
+
+def is_string_plus_number(string, user_input):
+    if SPACE not in user_input:
+        return (False, None)
+    split_input = user_input.split(SPACE)
+    if len(split_input) != 2:
+        return (False, None)
+    if split_input[0] != string:
+        return (False, None)
+    if not split_input[1].isnumeric():
+        return (False, None)
+    return (True, int(split_input[1]))
