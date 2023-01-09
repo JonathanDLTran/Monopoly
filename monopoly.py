@@ -381,7 +381,7 @@ def one_round(players):
 
         # Land on Income Tax
         if player.location in [INCOME_TAX_ID, LUXURY_TAX_ID]:
-            print(f"You have be accessed a ${TAX_AMT}.")
+            print(f"You have been accessed a ${TAX_AMT} tax.")
             player.cash -= TAX_AMT
 
         # property is owned by bank: either sell to current player, or attempt to auction to all players
@@ -391,7 +391,6 @@ def one_round(players):
                 user_input = input("Do you want to buy this property?: ")
                 if user_input == "yes":
                     property_obj.owner = player.id
-                    # property_obj.houses += 1
                     player.cash -= property_obj.deed_price
                     # handle bankruptcy
                 else:
@@ -399,7 +398,6 @@ def one_round(players):
                     if auction_result[0]:
                         auction_player, player_amt = auction_result[1]
                         property_obj.owner = auction_player.id
-                        property_obj.houses += 1
                         player.cash -= player_amt
 
         # user gives input
@@ -426,17 +424,45 @@ def one_round(players):
                 if prop.owner != player.id:
                     print(f"You do not own property {prop}.")
                     continue
+                # check all other properties in group owned by same player AND have at either the same number of houses or 1 more house
+                group = [p for p in PROPERTIES if p.color ==
+                         prop.color and p != prop]
+                owned_by_same_player = True
+                num_houses = []
+                for p in group:
+                    if p.owner != player.id:
+                        owned_by_same_player = False
+                        break
+                    num_houses.append(p.houses)
+                if not owned_by_same_player:
+                    print(
+                        "There is a property in the same color group not owned by you. You cannot build a house without a monopoly.")
+                    continue
+                unbalanced_houses = False
+                for num_house in num_houses:
+                    if (prop.houses + 1 > num_house + 1):
+                        unbalanced_houses = True
+                if unbalanced_houses:
+                    print(
+                        "Properties must be built in a balanced manner. You cannot build the house.")
+                    continue
                 if prop.houses < MAX_HOUSES:
                     prop.houses += 1
                     print("House was built.")
                 else:
-                    print(f"You can have at most 4 houses on a property.")
+                    print(f"You can have at most 4 houses or a hotel on a property.")
             # Commands for Testing Purposes
             elif user_input == "+1":
                 player.location = (player.location + 1) % NUM_PROPERTIES
             elif user_input == "-1":
                 player.location = (player.location +
                                    NUM_PROPERTIES - 1) % NUM_PROPERTIES
+            elif user_input == "buy":
+                location = player.location
+                location_key = extend_int_to_string(location)
+                if location_key in CAN_BUILD:
+                    prop = get_property(location_key)
+                    prop.owner = player.id
 
         # Final check of player's cash balance for bankruptcy at end of turn
         if player.cash < 0:

@@ -36,9 +36,14 @@ def build_board(players, properties):
         property_index = prop.id
         if prop.houses:
             n_houses = prop.houses
-            assert 0 < n_houses <= 4
-            h[property_index] = n_houses * HOUSE + \
-                (PLAYER_SYMBOL_STRING_LENGTH - n_houses * 2) * SPACE
+            assert 0 < n_houses <= MAX_HOUSES
+            # Hotel is built as a singular "fifth" house
+            if n_houses == MAX_HOUSES:
+                h[property_index] = HOTEL + SPACE + "HOTEL" + SPACE
+            # otherwise 4 or less houses show up inibidually
+            else:
+                h[property_index] = n_houses * HOUSE + \
+                    (PLAYER_SYMBOL_STRING_LENGTH - n_houses * 2) * SPACE
 
     # create owned by property dictionary
     o = dict()
