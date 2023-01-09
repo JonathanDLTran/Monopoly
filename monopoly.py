@@ -78,6 +78,8 @@ class Property(Location):
         self.owner = BANK
         self.houses = 0
 
+        self.mortgaged = False
+
     def __str__(self) -> str:
         return f"Property Name: {self.name} | Color Group: {self.color} | Deed Price: {self.deed_price} | House Price: {self.house_price} | Rent: {list(zip(['Deed Only', '1 House', '2 Houses','3 House', '4 Houses', 'Hotel'], self.rent))} | Mortgage Amount: {self.mortgage}"
 
@@ -280,7 +282,7 @@ def is_on_another_player_property(player, players, properties):
     if location_key not in CAN_BUILD:
         return (False, None, None)
     prop = get_property(location_key)
-    if prop.owner == player.id or prop.owner == BANK:
+    if prop.owner == player.id or prop.owner == BANK or prop.mortgaged:
         return (False, None, None)
     other_player_id = prop.owner
     other_player = None
@@ -439,6 +441,70 @@ def one_round(players):
                         print(prop)
             elif user_input == "finish":
                 break
+            elif is_string_plus_number("mortgage", user_input)[0]:
+                _, location = is_string_plus_number("mortgage", user_input)
+                if location < 0 or location >= NUM_PROPERTIES:
+                    continue
+                location_key = extend_int_to_string(location)
+                if location_key not in CAN_BUILD:
+                    continue
+                prop = get_property(location_key)
+                if prop.owner != player.id:
+                    print(f"You do not own property {prop}.")
+                    continue
+                if prop.houses > 0:
+                    print("Can only mortgage when no houses or hotels on property.")
+                    continue
+                print(
+                    f"Mortgaging property {prop}. Adding ${prop.mortgage} value.")
+                prop.mortgaged = True
+                player.cash += prop.mortgage
+            elif is_string_plus_number("unmortgage", user_input)[0]:
+                _, location = is_string_plus_number("unmortgage", user_input)
+                if location < 0 or location >= NUM_PROPERTIES:
+                    continue
+                location_key = extend_int_to_string(location)
+                if location_key not in CAN_BUILD:
+                    continue
+                prop = get_property(location_key)
+                if prop.owner != player.id:
+                    print(f"You do not own property {prop}.")
+                    continue
+                if player.cash < int(prop.mortgage * 1.1):
+                    print("Can only unmortgage when you have enough to pay back bank.")
+                    continue
+                print(
+                    f"Unmortgaging property {prop}. Subtracting 1.1 * ${prop.mortgage} value.")
+                prop.mortgaged = False
+                player.cash -= int(1.1 * prop.mortgage)
+            elif is_string_plus_number("sell", user_input)[0]:
+                _, location = is_string_plus_number("sell", user_input)
+                if location < 0 or location >= NUM_PROPERTIES:
+                    continue
+                location_key = extend_int_to_string(location)
+                if location_key not in CAN_BUILD:
+                    continue
+                prop = get_property(location_key)
+                if prop.owner != player.id:
+                    print(f"You do not own property {prop}.")
+                    continue
+                if prop.houses == 0:
+                    print("Can only sell when there is at least 1 house or hotel.")
+                    continue
+                # check balancing in property group
+                group = [p for p in PROPERTIES if p.color ==
+                         prop.color and p != prop]
+                balanced = True
+                for other_group_prop in group:
+                    if other_group_prop.houses - 1 > prop.houses - 1:
+                        balanced = False
+                if not balanced:
+                    print("You must sell houses or hotels in a balanced manner.")
+                    continue
+                print(
+                    f"Selling property {prop}. Adding 0.5 * ${prop.house_price} value.")
+                player.cash += int(0.5 * prop.house_price)
+                prop.houses -= 1
             elif is_string_plus_number("upgrade", user_input)[0]:
                 _, location = is_string_plus_number("upgrade", user_input)
                 if location < 0 or location >= NUM_PROPERTIES:
