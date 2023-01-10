@@ -1,2 +1,3 @@
 # Monopoly
-Monopoly Game
+
+This is an implementation of turn-based Monopoly.

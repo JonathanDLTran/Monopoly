@@ -178,6 +178,8 @@ def bank_error(player, players, properties):
 
 def doctors_fees(player, players, properties):
     player.cash -= 50
+    if player.cash < 0:
+        player.bankruptor = BANK
     # return true to indicate card should reenter deck
     return True
 
@@ -213,6 +215,8 @@ def grand_opera(player, players, properties):
         if p != player:
             player.cash += 50
             p.cash -= 50
+            if p.cash < 0:
+                p.bankruptor = player.id
 
     # return true to indicate card should reenter deck
     return True
@@ -237,6 +241,8 @@ def birthday(player, players, properties):
         if p != player:
             player.cash += 10
             p.cash -= 10
+            if p.cash < 0:
+                p.bankruptor = player.id
 
     # return true to indicate card should reenter deck
     return True
@@ -251,6 +257,8 @@ def life_insurance(player, players, properties):
 
 def hospital_fees(player, players, properties):
     player.cash -= 50
+    if player.cash < 0:
+        player.bankruptor = BANK
 
     # return true to indicate card should reenter deck
     return True
@@ -258,6 +266,8 @@ def hospital_fees(player, players, properties):
 
 def school_fees(player, players, properties):
     player.cash -= 50
+    if player.cash < 0:
+        player.bankruptor = BANK
 
     # return true to indicate card should reenter deck
     return True
@@ -281,6 +291,8 @@ def street_repairs(player, players, properties):
                 repair_fee += 115
     print(f"You owe ${repair_fee} in fees.")
     player.cash -= repair_fee
+    if player.cash < 0:
+        player.bankruptor = BANK
 
     # return true to indicate card should reenter deck
     return True
@@ -433,6 +445,8 @@ def general_repairs(player, players, properties):
                 repair_fee += 100
     print(f"You owe ${repair_fee} in fees.")
     player.cash -= repair_fee
+    if player.cash < 0:
+        player.bankruptor = BANK
 
     # return true to indicate card should reenter deck
     return True
@@ -469,6 +483,8 @@ def chairman(player, players, properties):
         if p != player:
             p.cash += 50
             player.cash -= 50
+            if player.cash < 0:
+                player.bankruptor = p.id
 
     # return true to indicate card should reenter deck
     return True
@@ -524,6 +540,7 @@ class Player(object):
         self.rolls_history = []
 
         self.bankrupt = False
+        self.bankruptor = None
 
         self.chance_get_out_of_jail = False
         self.cc_get_out_of_jail = False
@@ -632,10 +649,6 @@ UTILITIES = [
 PROPERTIES = BUILADBLES + RAILROADS + UTILITIES
 
 
-def game_over():
-    pass
-
-
 def get_property(prop_id):
     for prop in PROPERTIES:
         if prop.id == prop_id:
@@ -646,11 +659,12 @@ def get_property(prop_id):
 def auction(players, prop_name):
     auction_values = []
     for p in players:
-        player_amt = input(
-            f"Enter an integer value greater than or equal to 10, for the auction of the property {prop_name}. Values not in this range will indicate no participation in the auction: ")
-        player_amt = player_amt.strip().lower()
-        if player_amt.isnumeric() and int(player_amt) >= 10 and 0 <= int(player_amt) <= p.cash:
-            auction_values.append((p, int(player_amt)))
+        if not p.bankrupt:
+            player_amt = input(
+                f"Enter an integer value greater than or equal to 10, for the auction of the property {prop_name}. Values not in this range will indicate no participation in the auction: ")
+            player_amt = player_amt.strip().lower()
+            if player_amt.isnumeric() and int(player_amt) >= 10 and 0 <= int(player_amt) <= p.cash:
+                auction_values.append((p, int(player_amt)))
     sorted_values = sorted(
         auction_values, key=lambda pair: pair[1], reverse=True)
     if len(sorted_values) == 0:
@@ -815,6 +829,49 @@ def trade(player, players, properties):
     return True
 
 
+def handle_bankruptcy(player, players, properties):
+    assert player.bankrupt
+    assert player.bankruptor != None
+    if player.bankruptor == BANK:
+        print(
+            f"Bank receiving all of {player.name}'s properties and get out of jail free cards.")
+        for p in properties:
+            if p.owner == player.id:
+                # return all houses and hotels
+                p.houses = 0
+                result, auction_data = auction(players, p.name)
+                if result:
+                    # auction succeedd
+                    (auction_winner, auction_amt) = auction_data
+                    auction_winner.cash -= auction_amt
+                    p.owner = auction_winner.id
+                else:
+                    # auction failed
+                    p.owner = BANK
+
+        if player.chance_get_out_of_jail:
+            player.chance_get_out_of_jail = False
+            CHANCE_TRASH_DECK.append(CHANCE_GET_OF_JAIL_CARD)
+        if player.cc_get_out_of_jail:
+            player.cc_get_out_of_jail = False
+            COMMUNITY_TRASH_DECK.append(COMMUNITY_GET_OF_JAIL_CARD)
+        player.get_out_of_jail_cards = 0
+    else:
+        print(
+            f"Player {player.bankruptor.name} receiving all of {player.name}'s properties and get out of jail free cards.")
+        for p in properties:
+            if p.owner == player.id:
+                p.owner = player.bankruptor.id
+        if player.chance_get_out_of_jail:
+            player.bankruptor.chance_get_out_of_jail = True
+            player.chance_get_out_of_jail = False
+        if player.cc_get_out_of_jail:
+            player.bankruptor.cc_get_out_of_jail = True
+            player.cc_get_out_of_jail = False
+        player.bankruptor.get_out_of_jail_cards += player.get_out_of_jail_cards
+        player.get_out_of_jail_cards = 0
+
+
 def one_round(players):
     global COMMUNITY_DECK
     global COMMUNITY_TRASH_DECK
@@ -824,14 +881,14 @@ def one_round(players):
     for player in players:
 
         # check victory condition
-        # if not player.bankrupt:
-        #     for p in players:
-        #         if p != player and not p.bankrupt:
-        #             break
-        #     else:
-        #         print(
-        #             f"Victory for {player.name}! You are the last non-bankrupt player.")
-        #         exit(0)
+        if not player.bankrupt:
+            for p in players:
+                if p != player and not p.bankrupt:
+                    break
+            else:
+                print(
+                    f"Victory for {player.name}! You are the last non-bankrupt player.")
+                exit(0)
 
         # skip bankrupt players
         if player.bankrupt:
@@ -880,6 +937,8 @@ def one_round(players):
                 print(
                     f"Max Turns in Jail Reached. ${JAIL_AMT} charged to leave.")
                 player.cash -= JAIL_AMT
+                if player.cash < 0:
+                    player.bankruptor = BANK
 
             if not can_leave_jail:
                 continue
@@ -994,6 +1053,8 @@ def one_round(players):
         if player.location in [INCOME_TAX_ID, LUXURY_TAX_ID]:
             print(f"You have been accessed a ${TAX_AMT} tax.")
             player.cash -= TAX_AMT
+            if player.cash < 0:
+                player.bankruptor = BANK
 
         # Land on another player's property
         if is_on_another_player_property(player, players, PROPERTIES)[0]:
@@ -1050,6 +1111,8 @@ def one_round(players):
             print(f"You owe {other_player.name} ${rent} in rent.")
             other_player.cash += rent
             player.cash -= rent
+            if player.cash < 0:
+                player.bankruptor = other_player.id
 
         # property is owned by bank: either sell to current player, or attempt to auction to all players
         if location_key in CAN_OWN:
@@ -1234,11 +1297,15 @@ def one_round(players):
                     player, players, PROPERTIES)
                 if action_result:
                     CHANCE_TRASH_DECK.append(chance_card)
+            elif user_input == "bankrupt":
+                player.cash = -1000
+                player.bankruptor = BANK
 
-                # Final check of player's cash balance for bankruptcy at end of turn
+        # Final check of player's cash balance for bankruptcy at end of turn
         if player.cash < 0:
             print("You have become bankrupt at the end of the turn. Game over.")
             player.bankrupt = True
+            handle_bankruptcy(player, players, PROPERTIES)
 
 
 def setup_players(n_players):
