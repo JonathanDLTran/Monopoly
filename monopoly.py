@@ -688,6 +688,133 @@ def has_monopoly(player, prop, properties):
     return True
 
 
+def trade(player, players, properties):
+    trade_player = input(
+        "Who do you want to trade with? Input the player's name: ")
+    if trade_player == player.name:
+        print("You cannot trade with yourself.")
+        return False
+    other_player = None
+    for p in players:
+        if p != player and p.name == trade_player and not p.bankrupt:
+            other_player = p
+            break
+    else:
+        print("You must trade with an non-bankrupt player in the game.")
+        return False
+    assert other_player != None
+
+    your_trade = input(
+        "What are you trading: 'money' / 'property' / 'Jail Card'? ")
+    their_trade = input(
+        "What are you trading for: 'money' / 'property' / 'Jail Card'? ")
+    if your_trade == their_trade == "money":
+        print("You cannot trade money for money")
+        return False
+    if your_trade == "Jail Card" and player.get_out_of_jail_cards == 0:
+        print("You must have a get out of jail card to trade it.")
+        return False
+    if their_trade == "Jail Card" and other_player.get_out_of_jail_cards == 0:
+        print("Your trade partner must have a get out of jail card to trade it.")
+        return False
+
+    your_money_amt = None
+    their_money_amt = None
+    your_property = None
+    their_property = None
+    your_jail_card = your_trade == "Jail Card"
+    their_jail_card = their_trade == "Jail Card"
+    if your_trade == "money":
+        your_money_amt = input(
+            "Input an amount of money you are giving for the trade: ")
+        if not your_money_amt.isnumeric() or int(your_money_amt) <= 0:
+            print("Money amount must be a non-zero positive amount and an integer.")
+            return False
+        if int(your_money_amt) > player.cash:
+            print("Money amount must less than the cash you have currently.")
+            return False
+    if their_trade == "money":
+        their_money_amt = input(
+            "Input an amount of money you trade partner will give for the trade: ")
+        if not their_money_amt.isnumeric() or int(their_money_amt) <= 0:
+            print("Money amount must be a non-zero positive amount and an integer.")
+            return False
+        if int(their_money_amt) > other_player.cash:
+            print("Money amount must less than the cash your partner has have currently.")
+            return False
+
+    if your_trade == "property":
+        your_property = input(
+            "Please input your property number you are trading: ")
+        if not your_property.isnumeric() or (extend_int_to_string(int(your_property)) not in CAN_OWN):
+            print("Property Must be a numeric value corresponding to a buyable property.")
+            return False
+        location_key = extend_int_to_string(int(your_property))
+        prop = get_property(location_key)
+        if prop.owner != player.id:
+            print("You must own the property to trade it.")
+            return False
+        if prop.houses > 0:
+            print("You can only trade a property with no houses or hotels.")
+            return False
+        your_property = prop
+    if their_trade == "property":
+        their_property = input(
+            "Please input the property number your trade partner is trading: ")
+        if not their_property.isnumeric() or (extend_int_to_string(int(their_property)) not in CAN_OWN):
+            print("Property Must be a numeric value corresponding to a buyable property.")
+            return False
+        location_key = extend_int_to_string(int(their_property))
+        prop = get_property(location_key)
+        if prop.owner != other_player.id:
+            print("Your trade partner must own the property to trade it.")
+            return False
+        if prop.houses > 0:
+            print(
+                "Your trade partner can only trade a property with no houses or hotels.")
+            return False
+        their_property = prop
+
+    agreement_to_trade = input(
+        "Do both parties agree to trade? 'yes' to agree: ")
+    if agreement_to_trade != 'yes':
+        print("Agreement not reached. Trade cancelled.")
+        return False
+
+    print("Trade will happen.")
+    if your_money_amt != None:
+        player.cash -= int(your_money_amt)
+        other_player.cash += int(your_money_amt)
+    if their_money_amt != None:
+        player.cash += int(their_money_amt)
+        other_player.cash -= int(their_money_amt)
+    if your_property != None:
+        your_property.owner = other_player.id
+    if their_property != None:
+        their_property.owner = player.id
+
+    if your_jail_card:
+        player.get_out_of_jail_cards -= 1
+        other_player.get_out_of_jail_cards += 1
+        if player.chance_get_out_of_jail:
+            player.chance_get_out_of_jail = False
+            other_player.chance_get_out_of_jail = True
+        else:
+            player.cc_get_out_of_jail = False
+            other_player.cc_get_out_of_jail = True
+    if their_jail_card:
+        other_player.get_out_of_jail_cards -= 1
+        player.get_out_of_jail_cards += 1
+        if other_player.chance_get_out_of_jail:
+            other_player.chance_get_out_of_jail = False
+            player.chance_get_out_of_jail = True
+        else:
+            other_player.cc_get_out_of_jail = False
+            player.cc_get_out_of_jail = True
+
+    return True
+
+
 def one_round(players):
     global COMMUNITY_DECK
     global COMMUNITY_TRASH_DECK
@@ -854,6 +981,10 @@ def one_round(players):
 
             continue
 
+        # Grab updated location of player, after chance or community chest or go to jail movements
+        location = player.location
+        location_key = extend_int_to_string(location)
+
         # pass GO, get $200
         if player.location <= old_location:
             print(f"You passed Go! You earn ${GO_AMT}!")
@@ -948,8 +1079,13 @@ def one_round(players):
                         print(prop)
             elif user_input == "finish":
                 break
+            elif user_input == "quit":
+                print("Exiting game...")
+                exit(0)
             elif user_input == "trade":
-                break
+                trade_result = trade(player, players, PROPERTIES)
+                if not trade_result:
+                    print("Trade did not go through. Try again. ")
             elif is_string_plus_number("mortgage", user_input)[0]:
                 _, location = is_string_plus_number("mortgage", user_input)
                 if location < 0 or location >= NUM_PROPERTIES:
